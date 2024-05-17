@@ -1,0 +1,96 @@
+package queue
+
+import (
+	"fmt"
+	"strings"
+	"sync"
+
+	"github.com/gopi-frame/contract/support"
+	"github.com/gopi-frame/support/lists"
+)
+
+var _ support.Queue[any] = (*LinkedQueue[any])(nil)
+
+// NewLinkedQueue new linked queue
+func NewLinkedQueue[E any](values ...E) *LinkedQueue[E] {
+	queue := new(LinkedQueue[E])
+	queue.items = lists.NewLinkedList(values...)
+	return queue
+}
+
+// LinkedQueue linked queue
+type LinkedQueue[E any] struct {
+	sync.Mutex
+	items *lists.LinkedList[E]
+}
+
+func (q *LinkedQueue[E]) Count() int64 {
+	return q.items.Count()
+}
+
+func (q *LinkedQueue[E]) IsEmpty() bool {
+	return q.items.IsEmpty()
+}
+
+func (q *LinkedQueue[E]) IsNotEmpty() bool {
+	return q.items.IsNotEmpty()
+}
+
+func (q *LinkedQueue[E]) Clear() {
+	q.items.Clear()
+}
+
+func (q *LinkedQueue[E]) Peek() (E, bool) {
+	return q.items.First()
+}
+
+func (q *LinkedQueue[E]) Enqueue(value E) bool {
+	q.items.Push(value)
+	return true
+}
+
+func (q *LinkedQueue[E]) Dequeue() (value E, ok bool) {
+	if q.items.IsEmpty() {
+		return
+	}
+	return q.items.Shift()
+}
+
+func (q *LinkedQueue[E]) ToArray() []E {
+	return q.items.ToArray()
+}
+
+func (q *LinkedQueue[E]) ToJSON() ([]byte, error) {
+	return q.items.MarshalJSON()
+}
+
+func (q *LinkedQueue[E]) MarshalJSON() ([]byte, error) {
+	return q.ToJSON()
+}
+
+func (q *LinkedQueue[E]) UnmarshalJSON(data []byte) error {
+	return q.items.UnmarshalJSON(data)
+}
+
+func (q *LinkedQueue[E]) String() string {
+	str := new(strings.Builder)
+	str.WriteString(fmt.Sprintf("LinkedQueue[%T](len=%d)", *new(E), q.Count()))
+	str.WriteByte('{')
+	str.WriteByte('\n')
+	q.items.Each(func(index int, value E) bool {
+		str.WriteByte('\t')
+		if v, ok := any(value).(support.Stringable); ok {
+			str.WriteString(v.String())
+		} else {
+			str.WriteString(fmt.Sprintf("%v", value))
+		}
+		str.WriteByte(',')
+		str.WriteByte('\n')
+		return index < 4
+	})
+	if q.Count() > 5 {
+		str.WriteString("\t...\n")
+	}
+	str.WriteByte('}')
+	return str.String()
+}
