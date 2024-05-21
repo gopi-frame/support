@@ -4,13 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/gopi-frame/contract/support"
 	"github.com/gopi-frame/support/lists"
 )
-
-var _ support.Queue[any] = (*Queue[any])(nil)
 
 // NewQueue new queue
 func NewQueue[E any](values ...E) *Queue[E] {
@@ -21,8 +18,19 @@ func NewQueue[E any](values ...E) *Queue[E] {
 
 // Queue array queue
 type Queue[E any] struct {
-	sync.Mutex
 	items *lists.List[E]
+}
+
+func (q *Queue[E]) Lock() {
+	q.items.Lock()
+}
+
+func (q *Queue[E]) Unlock() {
+	q.items.Unlock()
+}
+
+func (q *Queue[E]) TryLock() bool {
+	return q.items.TryLock()
 }
 
 func (q *Queue[E]) Count() int64 {
@@ -52,6 +60,14 @@ func (q *Queue[E]) Enqueue(value E) bool {
 
 func (q *Queue[E]) Dequeue() (E, bool) {
 	return q.items.Shift()
+}
+
+func (q *Queue[E]) Remove(value E) {
+	q.items.Remove(value)
+}
+
+func (q *Queue[E]) RemoveWhere(callback func(value E) bool) {
+	q.items.RemoveWhere(callback)
 }
 
 func (q *Queue[E]) ToArray() []E {

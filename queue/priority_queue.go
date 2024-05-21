@@ -3,13 +3,13 @@ package queue
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/gopi-frame/contract/support"
 )
-
-var _ support.Queue[any] = (*PriorityQueue[any])(nil)
 
 // NewPriorityQueue new priority queue
 func NewPriorityQueue[E any](comparator support.Comparator[E], values ...E) *PriorityQueue[E] {
@@ -97,6 +97,17 @@ func (q *PriorityQueue[E]) Dequeue() (value E, ok bool) {
 		index = swapIndex
 	}
 	return
+}
+
+func (q *PriorityQueue[E]) Remove(value E) {
+	q.RemoveWhere(func(e E) bool {
+		return reflect.DeepEqual(e, value)
+	})
+}
+
+func (q *PriorityQueue[E]) RemoveWhere(callback func(E) bool) {
+	q.items = slices.DeleteFunc(q.items, callback)
+	q.size = int64(len(q.items))
 }
 
 func (q *PriorityQueue[E]) ToArray() []E {

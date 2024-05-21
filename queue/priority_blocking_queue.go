@@ -10,8 +10,6 @@ import (
 	"github.com/gopi-frame/contract/support"
 )
 
-var _ support.BlockingQueue[any] = (*PriorityBlockingQueue[any])(nil)
-
 // NewPriorityBlockingQueue new priority blocking queue
 func NewPriorityBlockingQueue[E any](comparator support.Comparator[E], cap int) *PriorityBlockingQueue[E] {
 	queue := new(PriorityBlockingQueue[E])
@@ -31,38 +29,44 @@ type PriorityBlockingQueue[E any] struct {
 }
 
 func (q *PriorityBlockingQueue[E]) Count() int64 {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.Count()
 }
 
 func (q *PriorityBlockingQueue[E]) IsEmpty() bool {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.IsEmpty()
 }
 
 func (q *PriorityBlockingQueue[E]) IsNotEmpty() bool {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.IsNotEmpty()
 }
 
 func (q *PriorityBlockingQueue[E]) Clear() {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	q.items.Clear()
 }
 
 func (q *PriorityBlockingQueue[E]) Peek() (E, bool) {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.Peek()
 }
 
 func (q *PriorityBlockingQueue[E]) TryEnqueue(value E) bool {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	if q.cap == int(q.items.Count()) {
 		return false
 	}
@@ -72,8 +76,9 @@ func (q *PriorityBlockingQueue[E]) TryEnqueue(value E) bool {
 }
 
 func (q *PriorityBlockingQueue[E]) TryDequeue() (E, bool) {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	if q.items.Count() == 0 {
 		return *new(E), false
 	}
@@ -83,8 +88,9 @@ func (q *PriorityBlockingQueue[E]) TryDequeue() (E, bool) {
 }
 
 func (q *PriorityBlockingQueue[E]) Enqueue(value E) bool {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	for q.cap == int(q.items.Count()) {
 		q.putLock.Wait()
 	}
@@ -94,8 +100,9 @@ func (q *PriorityBlockingQueue[E]) Enqueue(value E) bool {
 }
 
 func (q *PriorityBlockingQueue[E]) Dequeue() (E, bool) {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	for q.items.IsEmpty() {
 		q.takeLock.Wait()
 	}
@@ -146,15 +153,31 @@ func (q *PriorityBlockingQueue[E]) DequeueTimeout(duration time.Duration) (value
 	}
 }
 
+func (q *PriorityBlockingQueue[E]) Remove(value E) {
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
+	q.items.Remove(value)
+}
+
+func (q *PriorityBlockingQueue[E]) RemoveWhere(callback func(E) bool) {
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
+	q.items.RemoveWhere(callback)
+}
+
 func (q *PriorityBlockingQueue[E]) ToArray() []E {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.ToArray()
 }
 
 func (q *PriorityBlockingQueue[E]) ToJSON() ([]byte, error) {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.ToJSON()
 }
 
@@ -163,8 +186,9 @@ func (q *PriorityBlockingQueue[E]) MarshalJSON() ([]byte, error) {
 }
 
 func (q *PriorityBlockingQueue[E]) UnmarshalJSON(data []byte) error {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	values := make([]E, 0)
 	if err := json.Unmarshal(data, &values); err != nil {
 		return err
@@ -181,8 +205,9 @@ func (q *PriorityBlockingQueue[E]) UnmarshalJSON(data []byte) error {
 }
 
 func (q *PriorityBlockingQueue[E]) String() string {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	str := new(strings.Builder)
 	str.WriteString(fmt.Sprintf("PriorityBlockingQueue[%T](len=%d)", *new(E), q.items.Count()))
 	str.WriteByte('{')

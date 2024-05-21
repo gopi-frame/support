@@ -13,8 +13,6 @@ import (
 	"github.com/gopi-frame/support/lists"
 )
 
-var _ support.BlockingQueue[any] = (*LinkedBlockingQueue[any])(nil)
-
 // NewLinkedBlockingQueue new linked blocking queue
 func NewLinkedBlockingQueue[E any](cap int) *LinkedBlockingQueue[E] {
 	queue := new(LinkedBlockingQueue[E])
@@ -34,32 +32,37 @@ type LinkedBlockingQueue[E any] struct {
 }
 
 func (q *LinkedBlockingQueue[E]) Count() int64 {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.Count()
 }
 
 func (q *LinkedBlockingQueue[E]) IsEmpty() bool {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.IsEmpty()
 }
 
 func (q *LinkedBlockingQueue[E]) IsNotEmpty() bool {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.IsNotEmpty()
 }
 
 func (q *LinkedBlockingQueue[E]) Clear() {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	q.items.Clear()
 }
 
 func (q *LinkedBlockingQueue[E]) Peek() (E, bool) {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	if q.items.IsEmpty() {
 		return *new(E), false
 	}
@@ -67,8 +70,9 @@ func (q *LinkedBlockingQueue[E]) Peek() (E, bool) {
 }
 
 func (q *LinkedBlockingQueue[E]) TryEnqueue(value E) bool {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	if int64(q.cap) == q.items.Count() {
 		return false
 	}
@@ -78,8 +82,9 @@ func (q *LinkedBlockingQueue[E]) TryEnqueue(value E) bool {
 }
 
 func (q *LinkedBlockingQueue[E]) TryDequeue() (E, bool) {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	if q.items.IsEmpty() {
 		return *new(E), false
 	}
@@ -89,8 +94,9 @@ func (q *LinkedBlockingQueue[E]) TryDequeue() (E, bool) {
 }
 
 func (q *LinkedBlockingQueue[E]) Enqueue(value E) bool {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	for int64(q.cap) == q.items.Count() {
 		q.putLock.Wait()
 	}
@@ -100,8 +106,9 @@ func (q *LinkedBlockingQueue[E]) Enqueue(value E) bool {
 }
 
 func (q *LinkedBlockingQueue[E]) Dequeue() (E, bool) {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	for q.items.IsEmpty() {
 		q.takeLock.Wait()
 	}
@@ -161,15 +168,31 @@ func (q *LinkedBlockingQueue[E]) DequeueTimeout(duration time.Duration) (E, bool
 	return value, ok
 }
 
+func (q *LinkedBlockingQueue[E]) Remove(value E) {
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
+	q.items.Remove(value)
+}
+
+func (q *LinkedBlockingQueue[E]) RemoveWhere(callback func(E) bool) {
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
+	q.items.RemoveWhere(callback)
+}
+
 func (q *LinkedBlockingQueue[E]) ToArray() []E {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.ToArray()
 }
 
 func (q *LinkedBlockingQueue[E]) ToJSON() ([]byte, error) {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	return q.items.MarshalJSON()
 }
 
@@ -178,8 +201,9 @@ func (q *LinkedBlockingQueue[E]) MarshalJSON() ([]byte, error) {
 }
 
 func (q *LinkedBlockingQueue[E]) UnmarshalJSON(data []byte) error {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	values := make([]E, 0)
 	if err := json.Unmarshal(data, &values); err != nil {
 		return err
@@ -195,8 +219,9 @@ func (q *LinkedBlockingQueue[E]) UnmarshalJSON(data []byte) error {
 }
 
 func (q *LinkedBlockingQueue[E]) String() string {
-	q.items.Lock()
-	defer q.items.Unlock()
+	if q.items.TryLock() {
+		defer q.items.Unlock()
+	}
 	str := new(strings.Builder)
 	str.WriteString(fmt.Sprintf("LinkedBlockingQueue[%T](len=%d)", *new(E), q.items.Count()))
 	str.WriteByte('{')

@@ -3,13 +3,10 @@ package queue
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/gopi-frame/contract/support"
 	"github.com/gopi-frame/support/lists"
 )
-
-var _ support.Queue[any] = (*LinkedQueue[any])(nil)
 
 // NewLinkedQueue new linked queue
 func NewLinkedQueue[E any](values ...E) *LinkedQueue[E] {
@@ -20,8 +17,19 @@ func NewLinkedQueue[E any](values ...E) *LinkedQueue[E] {
 
 // LinkedQueue linked queue
 type LinkedQueue[E any] struct {
-	sync.Mutex
 	items *lists.LinkedList[E]
+}
+
+func (q *LinkedQueue[E]) Lock() {
+	q.items.Lock()
+}
+
+func (q *LinkedQueue[E]) Unlock() {
+	q.items.Unlock()
+}
+
+func (q *LinkedQueue[E]) TryLock() bool {
+	return q.items.TryLock()
 }
 
 func (q *LinkedQueue[E]) Count() int64 {
@@ -54,6 +62,14 @@ func (q *LinkedQueue[E]) Dequeue() (value E, ok bool) {
 		return
 	}
 	return q.items.Shift()
+}
+
+func (q *LinkedQueue[E]) Remove(value E) {
+	q.items.Remove(value)
+}
+
+func (q *LinkedQueue[E]) RemoveWhere(callback func(value E) bool) {
+	q.items.RemoveWhere(callback)
 }
 
 func (q *LinkedQueue[E]) ToArray() []E {
