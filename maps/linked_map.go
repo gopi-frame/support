@@ -27,7 +27,7 @@ func NewLinkedMap[K comparable, V any]() *LinkedMap[K, V] {
 
 // LinkedMap linked map
 type LinkedMap[K comparable, V any] struct {
-	sync.Mutex
+	sync.RWMutex
 	*Map[K, V]
 	keys *lists.LinkedList[K]
 }

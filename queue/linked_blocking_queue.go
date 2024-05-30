@@ -32,22 +32,22 @@ type LinkedBlockingQueue[E any] struct {
 }
 
 func (q *LinkedBlockingQueue[E]) Count() int64 {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.Count()
 }
 
 func (q *LinkedBlockingQueue[E]) IsEmpty() bool {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.IsEmpty()
 }
 
 func (q *LinkedBlockingQueue[E]) IsNotEmpty() bool {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.IsNotEmpty()
 }
@@ -60,8 +60,8 @@ func (q *LinkedBlockingQueue[E]) Clear() {
 }
 
 func (q *LinkedBlockingQueue[E]) Peek() (E, bool) {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	if q.items.IsEmpty() {
 		return *new(E), false
@@ -183,15 +183,15 @@ func (q *LinkedBlockingQueue[E]) RemoveWhere(callback func(E) bool) {
 }
 
 func (q *LinkedBlockingQueue[E]) ToArray() []E {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.ToArray()
 }
 
 func (q *LinkedBlockingQueue[E]) ToJSON() ([]byte, error) {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.MarshalJSON()
 }
@@ -219,8 +219,8 @@ func (q *LinkedBlockingQueue[E]) UnmarshalJSON(data []byte) error {
 }
 
 func (q *LinkedBlockingQueue[E]) String() string {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	str := new(strings.Builder)
 	str.WriteString(fmt.Sprintf("LinkedBlockingQueue[%T](len=%d)", *new(E), q.items.Count()))

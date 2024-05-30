@@ -21,7 +21,7 @@ func NewMap[K comparable, V any]() *Map[K, V] {
 
 // Map map
 type Map[K comparable, V any] struct {
-	sync.Mutex
+	sync.RWMutex
 	items map[K]V
 }
 

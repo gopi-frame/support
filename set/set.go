@@ -20,7 +20,7 @@ func NewSet[E support.Comparable](values ...E) *Set[E] {
 
 // Set hash set
 type Set[E support.Comparable] struct {
-	sync.Mutex
+	sync.RWMutex
 	items []E
 	size  int64
 }

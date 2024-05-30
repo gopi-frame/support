@@ -29,22 +29,22 @@ type PriorityBlockingQueue[E any] struct {
 }
 
 func (q *PriorityBlockingQueue[E]) Count() int64 {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.Count()
 }
 
 func (q *PriorityBlockingQueue[E]) IsEmpty() bool {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.IsEmpty()
 }
 
 func (q *PriorityBlockingQueue[E]) IsNotEmpty() bool {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.IsNotEmpty()
 }
@@ -57,8 +57,8 @@ func (q *PriorityBlockingQueue[E]) Clear() {
 }
 
 func (q *PriorityBlockingQueue[E]) Peek() (E, bool) {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.Peek()
 }
@@ -168,8 +168,8 @@ func (q *PriorityBlockingQueue[E]) RemoveWhere(callback func(E) bool) {
 }
 
 func (q *PriorityBlockingQueue[E]) ToArray() []E {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.ToArray()
 }

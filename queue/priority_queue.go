@@ -23,7 +23,7 @@ func NewPriorityQueue[E any](comparator support.Comparator[E], values ...E) *Pri
 
 // PriorityQueue priority queue
 type PriorityQueue[E any] struct {
-	sync.Mutex
+	sync.RWMutex
 	size       int64
 	items      []E
 	comparator support.Comparator[E]

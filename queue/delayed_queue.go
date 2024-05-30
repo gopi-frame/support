@@ -37,8 +37,8 @@ func (q *DelayedQueue[Q, T]) Compare(a, b Q) int {
 }
 
 func (q *DelayedQueue[Q, T]) Count() int64 {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return q.items.Count()
 }

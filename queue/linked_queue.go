@@ -32,6 +32,18 @@ func (q *LinkedQueue[E]) TryLock() bool {
 	return q.items.TryLock()
 }
 
+func (q *LinkedQueue[E]) RLock() {
+	q.items.RLock()
+}
+
+func (q *LinkedQueue[E]) RUnlock() {
+	q.items.RUnlock()
+}
+
+func (q *LinkedQueue[E]) TryRLock() bool {
+	return q.items.TryRLock()
+}
+
 func (q *LinkedQueue[E]) Count() int64 {
 	return q.items.Count()
 }

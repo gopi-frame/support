@@ -43,8 +43,8 @@ func (q *BlockingQueue[E]) moveIndex(index int) int {
 }
 
 func (q *BlockingQueue[E]) Count() int64 {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	return int64(q.size)
 }
@@ -68,8 +68,8 @@ func (q *BlockingQueue[E]) Clear() {
 }
 
 func (q *BlockingQueue[E]) Peek() (E, bool) {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	if q.size == 0 {
 		return *new(E), false
@@ -193,8 +193,8 @@ func (q *BlockingQueue[E]) DequeueTimeout(duration time.Duration) (E, bool) {
 }
 
 func (q *BlockingQueue[E]) ToArray() []E {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	values := []E{}
 	if q.enqueueIndex > q.dequeueIndex {
@@ -241,8 +241,8 @@ func (q *BlockingQueue[E]) UnmarshalJSON(data []byte) error {
 }
 
 func (q *BlockingQueue[E]) String() string {
-	if q.items.TryLock() {
-		defer q.items.Unlock()
+	if q.items.TryRLock() {
+		defer q.items.RUnlock()
 	}
 	str := new(strings.Builder)
 	str.WriteString(fmt.Sprintf("BlockingQueue[%T](len=%d)", *new(E), q.size))

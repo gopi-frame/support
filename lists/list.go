@@ -22,7 +22,7 @@ func NewList[E any](values ...E) *List[E] {
 
 // List list
 type List[E any] struct {
-	sync.Mutex
+	sync.RWMutex
 	items []E
 }
 

@@ -24,6 +24,30 @@ type LinkedSet[E support.Comparable] struct {
 	items *lists.LinkedList[E]
 }
 
+func (s *LinkedSet[E]) Lock() {
+	s.items.Lock()
+}
+
+func (s *LinkedSet[E]) Unlock() {
+	s.items.Unlock()
+}
+
+func (s *LinkedSet[E]) TryLock() bool {
+	return s.items.TryLock()
+}
+
+func (s *LinkedSet[E]) RLock() {
+	s.items.RLock()
+}
+
+func (s *LinkedSet[E]) RUnlock() {
+	s.items.RUnlock()
+}
+
+func (s *LinkedSet[E]) TryRLock() bool {
+	return s.items.TryRLock()
+}
+
 func (s *LinkedSet[E]) Count() int64 {
 	return s.items.Count()
 }

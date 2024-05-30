@@ -33,6 +33,18 @@ func (q *Queue[E]) TryLock() bool {
 	return q.items.TryLock()
 }
 
+func (q *Queue[E]) RLock() {
+	q.items.RLock()
+}
+
+func (q *Queue[E]) TryRLock() bool {
+	return q.items.TryRLock()
+}
+
+func (q *Queue[E]) RUnlock() {
+	q.items.RUnlock()
+}
+
 func (q *Queue[E]) Count() int64 {
 	return q.items.Count()
 }

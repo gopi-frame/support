@@ -24,7 +24,7 @@ func NewLinkedList[E any](values ...E) *LinkedList[E] {
 
 // LinkedList linked list
 type LinkedList[E any] struct {
-	sync.Mutex
+	sync.RWMutex
 	list *listlib.List
 }
 
